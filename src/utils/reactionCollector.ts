@@ -28,3 +28,21 @@ export async function collectReactions(
 
   return result;
 }
+
+/**
+ * 두 리액션 Map을 union(합집합)으로 병합한다.
+ * 같은 이모지에 대한 user Set은 합쳐지며 같은 userId는 자연 dedupe.
+ */
+export function unionReactions(
+  a: Map<string, Set<string>>,
+  b: Map<string, Set<string>>
+): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>();
+  for (const [emoji, users] of a) out.set(emoji, new Set(users));
+  for (const [emoji, users] of b) {
+    const set = out.get(emoji) ?? new Set<string>();
+    users.forEach((u) => set.add(u));
+    out.set(emoji, set);
+  }
+  return out;
+}
