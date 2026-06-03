@@ -1,14 +1,16 @@
 {
-  "name": "reaction-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "discord-forum-reaction-summary-bot",
+  "version": "0.1.0",
+  "description": "Discord forum 스레드의 스타터 메시지 리액션을 자동 추적하는 봇",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
+  "keywords": ["discord", "bot", "forum", "reaction"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "discord.js": "^14.25.1",
