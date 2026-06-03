@@ -13,6 +13,7 @@ const FILE_PATH = path.join(DATA_DIR, "trackingMap.json");
 
 const byThreadId = new Map<string, TrackingRecord>();
 const byStarterMessageId = new Map<string, TrackingRecord>();
+const byTrackingMessageId = new Map<string, TrackingRecord>();
 
 function load(): void {
   if (!fs.existsSync(FILE_PATH)) return;
@@ -20,6 +21,7 @@ function load(): void {
   for (const record of raw) {
     byThreadId.set(record.threadId, record);
     byStarterMessageId.set(record.starterMessageId, record);
+    byTrackingMessageId.set(record.trackingMessageId, record);
   }
 }
 
@@ -36,6 +38,7 @@ load();
 export function add(record: TrackingRecord): void {
   byThreadId.set(record.threadId, record);
   byStarterMessageId.set(record.starterMessageId, record);
+  byTrackingMessageId.set(record.trackingMessageId, record);
   save();
 }
 
@@ -44,6 +47,7 @@ export function removeByThreadId(threadId: string): TrackingRecord | undefined {
   if (!record) return undefined;
   byThreadId.delete(record.threadId);
   byStarterMessageId.delete(record.starterMessageId);
+  byTrackingMessageId.delete(record.trackingMessageId);
   save();
   return record;
 }
@@ -55,6 +59,7 @@ export function removeByStarterMessageId(
   if (!record) return undefined;
   byThreadId.delete(record.threadId);
   byStarterMessageId.delete(record.starterMessageId);
+  byTrackingMessageId.delete(record.trackingMessageId);
   save();
   return record;
 }
@@ -67,6 +72,12 @@ export function getByStarterMessageId(
   starterMessageId: string
 ): TrackingRecord | undefined {
   return byStarterMessageId.get(starterMessageId);
+}
+
+export function getByTrackingMessageId(
+  trackingMessageId: string
+): TrackingRecord | undefined {
+  return byTrackingMessageId.get(trackingMessageId);
 }
 
 export function allThreadIds(): string[] {
