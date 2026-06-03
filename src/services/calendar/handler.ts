@@ -205,5 +205,3 @@ export async function handleCalendarModalSubmit(
     });
   }
 }
-
-export { BUTTON_ID, MODAL_ID };

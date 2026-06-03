@@ -1,6 +1,7 @@
 import {
   Message,
   MessageReaction,
+  PartialMessage,
   PartialMessageReaction,
   PartialUser,
   ThreadChannel,
@@ -15,9 +16,9 @@ import { calendarButtonRow } from "./calendar/button";
 import { ensureTrackingMessage } from "./threadTracker";
 
 async function fetchFullMessage(
-  message: Message | { partial: boolean; fetch: () => Promise<Message> }
+  message: Message | PartialMessage
 ): Promise<Message> {
-  return message.partial ? await message.fetch() : (message as Message);
+  return message.partial ? await message.fetch() : message;
 }
 
 function resolveLocale(fallback?: string | null): string {
@@ -74,7 +75,7 @@ export async function onReactionChange(
   if (user.bot) return;
 
   try {
-    const message = await fetchFullMessage(reaction.message as Message);
+    const message = await fetchFullMessage(reaction.message);
     if (!trackingStore.getByStarterMessageId(message.id)) return;
     await refreshTrackingMessage(message);
   } catch (error) {

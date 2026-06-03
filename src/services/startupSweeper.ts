@@ -12,7 +12,13 @@ export async function run(client: Client): Promise<void> {
     return;
   }
 
-  const active = await (forum as ForumChannel).threads.fetchActive();
+  const active = await (forum as ForumChannel).threads
+    .fetchActive()
+    .catch((err) => {
+      console.error("[sweep] fetchActive failed:", err);
+      return null;
+    });
+  if (!active) return;
 
   let scanned = 0;
   let created = 0;
