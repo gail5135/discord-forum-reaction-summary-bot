@@ -32,13 +32,8 @@ export async function run(client: Client): Promise<void> {
         await ensureTrackingMessage(thread as ThreadChannel);
         if (trackingStore.getByThreadId(thread.id)) created++;
       } else {
-        const starter = await (thread as ThreadChannel)
-          .fetchStarterMessage()
-          .catch(() => null);
-        if (starter) {
-          await refreshTrackingMessage(starter, { allowRecreate: false });
-          resynced++;
-        }
+        await refreshTrackingMessage(client, record, { allowRecreate: false });
+        resynced++;
       }
     } catch (error) {
       console.error(`[sweep] thread ${thread.id} failed:`, error);
