@@ -127,4 +127,4 @@ src/
 
 ## 📄 라이선스
 
-MIT
+MIT — [LICENSE](./LICENSE) 파일을 참고하세요.
