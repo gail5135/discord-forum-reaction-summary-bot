@@ -49,6 +49,7 @@
 DISCORD_TOKEN=YOUR_BOT_TOKEN
 TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=ja
+BOT_TIMEZONE=Asia/Tokyo
 ```
 
 | 変数 | 説明 | 必須 |
@@ -56,6 +57,7 @@ BOT_LOCALE=ja
 | `DISCORD_TOKEN` | Discord ボットトークン | ✅ |
 | `TARGET_FORUM_ID` | 監視するフォーラムチャンネル ID | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en`(未設定の場合はギルドの優先ロケール → `en`) | ❌ |
+| `BOT_TIMEZONE` | カレンダー予定の入力時刻を解釈する IANA タイムゾーン（例: `Asia/Tokyo`）。未設定または無効な IANA タイムゾーンの場合は起動に失敗します | ✅ |
 
 ---
 

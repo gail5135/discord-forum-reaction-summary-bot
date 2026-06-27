@@ -49,6 +49,7 @@ When a new thread is created in the designated **forum channel**, the bot automa
 DISCORD_TOKEN=YOUR_BOT_TOKEN
 TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=en
+BOT_TIMEZONE=Asia/Tokyo
 ```
 
 | Variable | Description | Required |
@@ -56,6 +57,7 @@ BOT_LOCALE=en
 | `DISCORD_TOKEN` | Discord bot token | ✅ |
 | `TARGET_FORUM_ID` | ID of the forum channel to watch | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en` (falls back to guild preferred locale → `en` when unset) | ❌ |
+| `BOT_TIMEZONE` | IANA timezone used to interpret calendar event input times (e.g. `Asia/Tokyo`). Startup fails if it is missing or not a valid IANA timezone | ✅ |
 
 ---
 

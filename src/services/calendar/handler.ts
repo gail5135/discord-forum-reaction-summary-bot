@@ -12,9 +12,10 @@ import {
 } from "discord.js";
 
 import { t } from "../../i18n";
-import { BOT_LOCALE } from "../../config/env";
+import { BOT_LOCALE, BOT_TIMEZONE } from "../../config/env";
 import * as trackingStore from "../../store/trackingStore";
-import { BUTTON_ID, MODAL_ID } from "./button";
+import { zonedWallTimeToUtc } from "../../utils/timezone";
+import { MODAL_ID } from "./button";
 
 function resolveLocale(fallback?: string | null): string {
   return BOT_LOCALE || fallback?.split("-")[0] || "en";
@@ -162,7 +163,7 @@ export async function handleCalendarModalSubmit(
     return;
   }
 
-  const startDate = new Date(year, month - 1, day, hour, minute);
+  const startDate = zonedWallTimeToUtc(year, month, day, hour, minute, BOT_TIMEZONE);
   if (isNaN(startDate.getTime())) {
     await interaction.reply({
       content: t("error.invalidDateFormat", locale),

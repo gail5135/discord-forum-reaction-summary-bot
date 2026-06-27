@@ -49,6 +49,7 @@
 DISCORD_TOKEN=YOUR_BOT_TOKEN
 TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=ko
+BOT_TIMEZONE=Asia/Tokyo
 ```
 
 | 변수 | 설명 | 필수 |
@@ -56,6 +57,7 @@ BOT_LOCALE=ko
 | `DISCORD_TOKEN` | Discord Bot 토큰 | ✅ |
 | `TARGET_FORUM_ID` | 감시할 포럼 채널 ID | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en` (미설정 시 길드 기본 → `en`) | ❌ |
+| `BOT_TIMEZONE` | 캘린더 일정 입력 시각을 해석할 IANA 타임존 (예: `Asia/Tokyo`). 미설정이거나 유효하지 않은 IANA 타임존이면 기동에 실패 | ✅ |
 
 ---
 
