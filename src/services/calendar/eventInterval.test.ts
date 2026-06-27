@@ -43,6 +43,17 @@ test("rejects out-of-range hour or minute", () => {
   );
 });
 
+test("rejects malformed or out-of-range end time (valid start)", () => {
+  assert.deepEqual(
+    buildEventInterval("2026-07-01", "19:00", "9:00", "Asia/Tokyo"),
+    { ok: false, error: "invalidTimeFormat" }
+  );
+  assert.deepEqual(
+    buildEventInterval("2026-07-01", "19:00", "25:00", "Asia/Tokyo"),
+    { ok: false, error: "invalidTimeFormat" }
+  );
+});
+
 test("rejects out-of-range month or day", () => {
   assert.deepEqual(
     buildEventInterval("2026-13-01", "19:00", "21:00", "Asia/Tokyo"),
