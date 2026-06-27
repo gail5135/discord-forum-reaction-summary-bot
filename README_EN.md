@@ -85,6 +85,7 @@ npm start
 Type-check only:
 ```bash
 npm run typecheck
+npm test
 ```
 
 On successful start, the console will print:
@@ -108,6 +109,7 @@ src/
 │   ├── cleanup.ts                # Handles starter/thread deletion
 │   └── calendar/
 │       ├── button.ts             # Calendar ActionRow
+│       ├── eventInterval.ts      # Start/end time validation & UTC conversion (pure)
 │       └── handler.ts            # Calendar button/modal
 ├── store/
 │   └── trackingStore.ts          # Mapping persistence

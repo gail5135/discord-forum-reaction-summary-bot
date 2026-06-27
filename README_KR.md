@@ -85,6 +85,7 @@ npm start
 타입체크만:
 ```bash
 npm run typecheck
+npm test
 ```
 
 성공 시 콘솔에 다음과 같이 출력됩니다:
@@ -108,6 +109,7 @@ src/
 │   ├── cleanup.ts                # 스타터/스레드 삭제 처리
 │   └── calendar/
 │       ├── button.ts             # 캘린더 ActionRow
+│       ├── eventInterval.ts      # 시작/종료 시각 검증·UTC 변환 (순수 함수)
 │       └── handler.ts            # 캘린더 버튼/모달
 ├── store/
 │   └── trackingStore.ts          # 매핑 영속화

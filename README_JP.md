@@ -85,6 +85,7 @@ npm start
 型チェックのみ:
 ```bash
 npm run typecheck
+npm test
 ```
 
 正常に起動するとコンソールに以下が出力されます:
@@ -108,6 +109,7 @@ src/
 │   ├── cleanup.ts                # スターター/スレッド削除処理
 │   └── calendar/
 │       ├── button.ts             # カレンダー ActionRow
+│       ├── eventInterval.ts      # 開始/終了時刻の検証・UTC変換 (純粋関数)
 │       └── handler.ts            # カレンダーボタン/モーダル
 ├── store/
 │   └── trackingStore.ts          # マッピング永続化
