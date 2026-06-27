@@ -8,7 +8,8 @@ export const BUTTON_ID = {
 export const MODAL_ID = {
   CALENDAR: "calendar_modal",
   CALENDAR_DATE: "calendar_date_input",
-  CALENDAR_TIME: "calendar_time_input",
+  CALENDAR_START_TIME: "calendar_start_time_input",
+  CALENDAR_END_TIME: "calendar_end_time_input",
   CALENDAR_TITLE: "calendar_title_input",
 } as const;
 

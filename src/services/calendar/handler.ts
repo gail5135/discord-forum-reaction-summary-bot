@@ -14,7 +14,7 @@ import {
 import { t } from "../../i18n";
 import { BOT_LOCALE, BOT_TIMEZONE } from "../../config/env";
 import * as trackingStore from "../../store/trackingStore";
-import { zonedWallTimeToUtc } from "../../utils/timezone";
+import { buildEventInterval } from "./eventInterval";
 import { MODAL_ID } from "./button";
 
 function resolveLocale(fallback?: string | null): string {
@@ -81,9 +81,18 @@ export async function handleCalendarButton(
     .setMaxLength(10)
     .setMinLength(10);
 
-  const timeInput = new TextInputBuilder()
-    .setCustomId(MODAL_ID.CALENDAR_TIME)
-    .setLabel(t("modal.calendarTimeLabel", locale))
+  const startTimeInput = new TextInputBuilder()
+    .setCustomId(MODAL_ID.CALENDAR_START_TIME)
+    .setLabel(t("modal.calendarStartTimeLabel", locale))
+    .setStyle(TextInputStyle.Short)
+    .setPlaceholder("hh:mm")
+    .setRequired(true)
+    .setMaxLength(5)
+    .setMinLength(5);
+
+  const endTimeInput = new TextInputBuilder()
+    .setCustomId(MODAL_ID.CALENDAR_END_TIME)
+    .setLabel(t("modal.calendarEndTimeLabel", locale))
     .setStyle(TextInputStyle.Short)
     .setPlaceholder("hh:mm")
     .setRequired(true)
@@ -100,7 +109,8 @@ export async function handleCalendarButton(
 
   modal.addComponents(
     new ActionRowBuilder<TextInputBuilder>().addComponents(dateInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(timeInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(startTimeInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(endTimeInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(titleInput)
   );
 
@@ -123,54 +133,24 @@ export async function handleCalendarModalSubmit(
   }
 
   const dateStr = interaction.fields.getTextInputValue(MODAL_ID.CALENDAR_DATE);
-  const timeStr = interaction.fields.getTextInputValue(MODAL_ID.CALENDAR_TIME);
+  const startStr = interaction.fields.getTextInputValue(
+    MODAL_ID.CALENDAR_START_TIME
+  );
+  const endStr = interaction.fields.getTextInputValue(
+    MODAL_ID.CALENDAR_END_TIME
+  );
   const title = interaction.fields.getTextInputValue(MODAL_ID.CALENDAR_TITLE);
 
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(dateStr)) {
+  const interval = buildEventInterval(dateStr, startStr, endStr, BOT_TIMEZONE);
+  if (!interval.ok) {
     await interaction.reply({
-      content: t("error.invalidDateFormat", locale),
+      content: t(`error.${interval.error}`, locale),
       ephemeral: true,
     });
     return;
   }
 
-  const timeRegex = /^\d{2}:\d{2}$/;
-  if (!timeRegex.test(timeStr)) {
-    await interaction.reply({
-      content: t("error.invalidTimeFormat", locale),
-      ephemeral: true,
-    });
-    return;
-  }
-
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const [hour, minute] = timeStr.split(":").map(Number);
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    await interaction.reply({
-      content: t("error.invalidDateFormat", locale),
-      ephemeral: true,
-    });
-    return;
-  }
-
-  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-    await interaction.reply({
-      content: t("error.invalidTimeFormat", locale),
-      ephemeral: true,
-    });
-    return;
-  }
-
-  const startDate = zonedWallTimeToUtc(year, month, day, hour, minute, BOT_TIMEZONE);
-  if (isNaN(startDate.getTime())) {
-    await interaction.reply({
-      content: t("error.invalidDateFormat", locale),
-      ephemeral: true,
-    });
-    return;
-  }
+  const { startDate, endDate } = interval;
 
   if (startDate.getTime() < Date.now()) {
     await interaction.reply({
@@ -179,8 +159,6 @@ export async function handleCalendarModalSubmit(
     });
     return;
   }
-
-  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
   const messageLink = buildMessageLink(guild.id, message.channelId, message.id);
 
   try {
