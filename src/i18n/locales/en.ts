@@ -15,6 +15,7 @@ export const en = {
     calendarEndTimeLabel: "End time (hh:mm, 24-hour)",
     calendarTitleLabel: "Calendar Event Title",
     calendarTitlePlaceholder: "Enter calendar event title",
+    calendarChannelPlaceholder: "Select the voice channel to gather in",
   },
   button: {
     calendar: "Add Calendar Event",

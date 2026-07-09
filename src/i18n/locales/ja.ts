@@ -15,6 +15,7 @@ export const ja = {
     calendarEndTimeLabel: "終了時刻 (hh:mm、24時間制)",
     calendarTitleLabel: "カレンダーイベントタイトル",
     calendarTitlePlaceholder: "カレンダーイベントのタイトルを入力してください",
+    calendarChannelPlaceholder: "集まるボイスチャンネルを選択してください",
   },
   button: {
     calendar: "カレンダーイベント追加",

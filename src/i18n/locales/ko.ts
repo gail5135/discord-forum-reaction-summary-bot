@@ -15,6 +15,7 @@ export const ko = {
     calendarEndTimeLabel: "종료 시각 (hh:mm, 24시간제)",
     calendarTitleLabel: "일정 제목",
     calendarTitlePlaceholder: "일정 제목을 입력해주세요",
+    calendarChannelPlaceholder: "모일 음성 채널을 선택해주세요",
   },
   button: {
     calendar: "일정 추가",
