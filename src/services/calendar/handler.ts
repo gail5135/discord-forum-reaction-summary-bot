@@ -20,7 +20,6 @@ import * as trackingStore from "../../store/trackingStore";
 import { buildEventInterval } from "./eventInterval";
 import { MODAL_ID } from "./button";
 import {
-  CHANNEL_SELECT_PREFIX,
   encodeChannelSelectId,
   parseChannelSelectId,
   encodeModalId,
