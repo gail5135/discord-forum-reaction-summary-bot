@@ -10,10 +10,14 @@ import { BUTTON_ID } from "./services/calendar/button";
 import {
   CHANNEL_SELECT_PREFIX,
   MODAL_PREFIX,
+  OPEN_MODAL_PREFIX,
+  CANCEL_ID,
 } from "./services/calendar/customId";
 import {
   handleCalendarButton,
   handleCalendarChannelSelect,
+  handleCalendarOpenModal,
+  handleCalendarCancel,
   handleCalendarModalSubmit,
 } from "./services/calendar/handler";
 
@@ -56,6 +60,10 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.isButton()) {
       if (interaction.customId === BUTTON_ID.CALENDAR) {
         await handleCalendarButton(interaction);
+      } else if (interaction.customId.startsWith(OPEN_MODAL_PREFIX)) {
+        await handleCalendarOpenModal(interaction);
+      } else if (interaction.customId === CANCEL_ID) {
+        await handleCalendarCancel(interaction);
       }
       return;
     }

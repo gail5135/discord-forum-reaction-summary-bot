@@ -16,14 +16,18 @@ export const en = {
     calendarTitleLabel: "Calendar Event Title",
     calendarTitlePlaceholder: "Enter calendar event title",
     calendarChannelPlaceholder: "Select the voice channel to gather in",
+    calendarProceedHint: "Selected voice channel. Press [Enter Event Details] below to continue.",
   },
   button: {
     calendar: "Add Calendar Event",
+    calendarOpenModal: "Enter Event Details",
+    calendarCancel: "Cancel",
   },
   summary: {
     empty: "_No reactions yet._",
   },
   success: {
     calendarAdded: "Calendar event has been added.",
+    calendarCancelled: "Event registration cancelled.",
   },
 } as const;

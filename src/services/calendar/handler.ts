@@ -1,6 +1,8 @@
 import {
   ActionRowBuilder,
+  ButtonBuilder,
   ButtonInteraction,
+  ButtonStyle,
   ChannelSelectMenuBuilder,
   ChannelSelectMenuInteraction,
   ChannelType,
@@ -20,10 +22,13 @@ import * as trackingStore from "../../store/trackingStore";
 import { buildEventInterval } from "./eventInterval";
 import { MODAL_ID } from "./button";
 import {
+  CANCEL_ID,
   encodeChannelSelectId,
   parseChannelSelectId,
   encodeModalId,
   parseModalId,
+  encodeOpenModalId,
+  parseOpenModalId,
 } from "./customId";
 
 function resolveLocale(fallback?: string | null): string {
@@ -88,6 +93,45 @@ function buildCalendarModal(customId: string, locale: string): ModalBuilder {
   return modal;
 }
 
+function buildChannelSelectRow(
+  sourceChannelId: string,
+  sourceMessageId: string,
+  locale: string
+): ActionRowBuilder<ChannelSelectMenuBuilder> {
+  const selectMenu = new ChannelSelectMenuBuilder()
+    .setCustomId(encodeChannelSelectId(sourceChannelId, sourceMessageId))
+    .setPlaceholder(t("modal.calendarChannelPlaceholder", locale))
+    .addChannelTypes(ChannelType.GuildVoice);
+
+  return new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
+    selectMenu
+  );
+}
+
+function buildProceedButtonsRow(
+  voiceChannelId: string,
+  sourceChannelId: string,
+  sourceMessageId: string,
+  locale: string
+): ActionRowBuilder<ButtonBuilder> {
+  const openModalButton = new ButtonBuilder()
+    .setCustomId(
+      encodeOpenModalId(voiceChannelId, sourceChannelId, sourceMessageId)
+    )
+    .setLabel(t("button.calendarOpenModal", locale))
+    .setStyle(ButtonStyle.Primary);
+
+  const cancelButton = new ButtonBuilder()
+    .setCustomId(CANCEL_ID)
+    .setLabel(t("button.calendarCancel", locale))
+    .setStyle(ButtonStyle.Secondary);
+
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    openModalButton,
+    cancelButton
+  );
+}
+
 export async function handleCalendarButton(
   interaction: ButtonInteraction
 ): Promise<void> {
@@ -127,16 +171,9 @@ export async function handleCalendarButton(
     return;
   }
 
-  const selectMenu = new ChannelSelectMenuBuilder()
-    .setCustomId(encodeChannelSelectId(message.channelId, message.id))
-    .setPlaceholder(t("modal.calendarChannelPlaceholder", locale))
-    .addChannelTypes(ChannelType.GuildVoice);
-
   await interaction.reply({
     content: t("modal.calendarChannelPlaceholder", locale),
-    components: [
-      new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(selectMenu),
-    ],
+    components: [buildChannelSelectRow(message.channelId, message.id, locale)],
     ephemeral: true,
   });
 }
@@ -156,12 +193,62 @@ export async function handleCalendarChannelSelect(
     return;
   }
 
+  // showModal은 첫 응답이어야 하므로 여기서 바로 열지 않는다. 대신 메시지를
+  // 갱신해 선택 결과를 반영하고, 모달은 [일정 입력] 버튼에서 연다. 이렇게 하면
+  // 재선택이 항상 반영되고, 모달을 닫아도 [취소] 버튼으로 정리할 수 있다.
+  await interaction.update({
+    content: `<#${voiceChannelId}>\n${t("modal.calendarProceedHint", locale)}`,
+    components: [
+      buildChannelSelectRow(
+        source.sourceChannelId,
+        source.sourceMessageId,
+        locale
+      ),
+      buildProceedButtonsRow(
+        voiceChannelId,
+        source.sourceChannelId,
+        source.sourceMessageId,
+        locale
+      ),
+    ],
+  });
+}
+
+export async function handleCalendarOpenModal(
+  interaction: ButtonInteraction
+): Promise<void> {
+  const locale = resolveLocale(interaction.guild?.preferredLocale);
+
+  const parsed = parseOpenModalId(interaction.customId);
+  if (!parsed) {
+    await interaction.reply({
+      content: t("error.cannotCalendar", locale),
+      ephemeral: true,
+    });
+    return;
+  }
+
   const modal = buildCalendarModal(
-    encodeModalId(voiceChannelId, source.sourceChannelId, source.sourceMessageId),
+    encodeModalId(
+      parsed.voiceChannelId,
+      parsed.sourceChannelId,
+      parsed.sourceMessageId
+    ),
     locale
   );
 
   await interaction.showModal(modal);
+}
+
+export async function handleCalendarCancel(
+  interaction: ButtonInteraction
+): Promise<void> {
+  const locale = resolveLocale(interaction.guild?.preferredLocale);
+
+  await interaction.update({
+    content: t("success.calendarCancelled", locale),
+    components: [],
+  });
 }
 
 export async function handleCalendarModalSubmit(
@@ -222,10 +309,19 @@ export async function handleCalendarModalSubmit(
       description: messageLink,
     });
 
-    await interaction.reply({
-      content: t("success.calendarAdded", locale),
-      ephemeral: true,
-    });
+    // 모달은 [일정 입력] 버튼(원본 ephemeral 메시지의 컴포넌트)에서 열렸으므로
+    // update()로 그 메시지를 정리한다. 드롭다운/버튼이 남지 않는다.
+    if (interaction.isFromMessage()) {
+      await interaction.update({
+        content: t("success.calendarAdded", locale),
+        components: [],
+      });
+    } else {
+      await interaction.reply({
+        content: t("success.calendarAdded", locale),
+        ephemeral: true,
+      });
+    }
   } catch (error) {
     console.error("Calendar event creation failed:", error);
     await interaction.reply({
