@@ -6,12 +6,14 @@ import * as threadTracker from "./services/threadTracker";
 import * as reactionTracker from "./services/reactionTracker";
 import * as cleanup from "./services/cleanup";
 import * as startupSweeper from "./services/startupSweeper";
+import { BUTTON_ID } from "./services/calendar/button";
 import {
-  BUTTON_ID,
-  MODAL_ID,
-} from "./services/calendar/button";
+  CHANNEL_SELECT_PREFIX,
+  MODAL_PREFIX,
+} from "./services/calendar/customId";
 import {
   handleCalendarButton,
+  handleCalendarChannelSelect,
   handleCalendarModalSubmit,
 } from "./services/calendar/handler";
 
@@ -58,8 +60,15 @@ client.on("interactionCreate", async (interaction) => {
       return;
     }
 
+    if (interaction.isChannelSelectMenu()) {
+      if (interaction.customId.startsWith(CHANNEL_SELECT_PREFIX)) {
+        await handleCalendarChannelSelect(interaction);
+      }
+      return;
+    }
+
     if (interaction.isModalSubmit()) {
-      if (interaction.customId === MODAL_ID.CALENDAR) {
+      if (interaction.customId.startsWith(MODAL_PREFIX)) {
         await handleCalendarModalSubmit(interaction);
       }
       return;
