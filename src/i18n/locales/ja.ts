@@ -15,14 +15,19 @@ export const ja = {
     calendarEndTimeLabel: "終了時刻 (hh:mm、24時間制)",
     calendarTitleLabel: "カレンダーイベントタイトル",
     calendarTitlePlaceholder: "カレンダーイベントのタイトルを入力してください",
+    calendarChannelPlaceholder: "集まるボイスチャンネルを選択してください",
+    calendarProceedHint: "選択したボイスチャンネルです。下の[イベントを入力]ボタンを押して続行してください。",
   },
   button: {
     calendar: "カレンダーイベント追加",
+    calendarOpenModal: "イベントを入力",
+    calendarCancel: "キャンセル",
   },
   summary: {
     empty: "_まだリアクションがありません。_",
   },
   success: {
     calendarAdded: "カレンダーイベントを登録しました。",
+    calendarCancelled: "イベント登録をキャンセルしました。",
   },
 } as const;

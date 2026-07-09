@@ -15,14 +15,19 @@ export const ko = {
     calendarEndTimeLabel: "종료 시각 (hh:mm, 24시간제)",
     calendarTitleLabel: "일정 제목",
     calendarTitlePlaceholder: "일정 제목을 입력해주세요",
+    calendarChannelPlaceholder: "모일 음성 채널을 선택해주세요",
+    calendarProceedHint: "선택한 음성 채널입니다. 아래 [일정 입력] 버튼을 눌러 계속하세요.",
   },
   button: {
     calendar: "일정 추가",
+    calendarOpenModal: "일정 입력",
+    calendarCancel: "취소",
   },
   summary: {
     empty: "_아직 반응이 없습니다._",
   },
   success: {
     calendarAdded: "캘린더에 일정이 등록되었습니다.",
+    calendarCancelled: "이벤트 등록을 취소했습니다.",
   },
 } as const;

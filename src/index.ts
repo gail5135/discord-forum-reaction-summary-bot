@@ -6,12 +6,18 @@ import * as threadTracker from "./services/threadTracker";
 import * as reactionTracker from "./services/reactionTracker";
 import * as cleanup from "./services/cleanup";
 import * as startupSweeper from "./services/startupSweeper";
+import { BUTTON_ID } from "./services/calendar/button";
 import {
-  BUTTON_ID,
-  MODAL_ID,
-} from "./services/calendar/button";
+  CHANNEL_SELECT_PREFIX,
+  MODAL_PREFIX,
+  OPEN_MODAL_PREFIX,
+  CANCEL_ID,
+} from "./services/calendar/customId";
 import {
   handleCalendarButton,
+  handleCalendarChannelSelect,
+  handleCalendarOpenModal,
+  handleCalendarCancel,
   handleCalendarModalSubmit,
 } from "./services/calendar/handler";
 
@@ -54,12 +60,23 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.isButton()) {
       if (interaction.customId === BUTTON_ID.CALENDAR) {
         await handleCalendarButton(interaction);
+      } else if (interaction.customId.startsWith(OPEN_MODAL_PREFIX)) {
+        await handleCalendarOpenModal(interaction);
+      } else if (interaction.customId === CANCEL_ID) {
+        await handleCalendarCancel(interaction);
+      }
+      return;
+    }
+
+    if (interaction.isChannelSelectMenu()) {
+      if (interaction.customId.startsWith(CHANNEL_SELECT_PREFIX)) {
+        await handleCalendarChannelSelect(interaction);
       }
       return;
     }
 
     if (interaction.isModalSubmit()) {
-      if (interaction.customId === MODAL_ID.CALENDAR) {
+      if (interaction.customId.startsWith(MODAL_PREFIX)) {
         await handleCalendarModalSubmit(interaction);
       }
       return;

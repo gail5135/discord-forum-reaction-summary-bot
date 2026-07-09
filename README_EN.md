@@ -11,7 +11,7 @@ When a new thread is created in the designated **forum channel**, the bot automa
 - ✅ Groups mentions by emoji (supports custom and animated emojis)
 - ✅ Sweeps active threads on bot startup to backfill any missed entries
 - ✅ Cleans up mappings automatically when the starter message or thread is deleted
-- ✅ Calendar event registration button (thread OP / server administrators)
+- ✅ Calendar event registration button (thread OP / server administrators): select a voice channel to register the event, and the Discord scheduled event is attached to that voice channel
 - ✅ JSON persistence (mappings survive bot restarts)
 - ✅ Multilingual UI (ko / ja / en)
 
