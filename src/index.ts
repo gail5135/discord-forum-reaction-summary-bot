@@ -20,6 +20,8 @@ import {
   handleCalendarCancel,
   handleCalendarModalSubmit,
 } from "./services/calendar/handler";
+import { FORUM_COMMAND_NAME, registerAll, registerForGuild } from "./commands/definitions";
+import { handleForumCommand } from "./commands/forum";
 
 const client = new Client({
   intents: [
@@ -32,7 +34,12 @@ const client = new Client({
 
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user?.tag}`);
+  await registerAll(client);
   await startupSweeper.run(client);
+});
+
+client.on("guildCreate", async (guild) => {
+  await registerForGuild(guild);
 });
 
 client.on("threadCreate", async (thread) => {
@@ -57,6 +64,13 @@ client.on("threadDelete", async (thread) => {
 
 client.on("interactionCreate", async (interaction) => {
   try {
+    if (interaction.isChatInputCommand()) {
+      if (interaction.commandName === FORUM_COMMAND_NAME) {
+        await handleForumCommand(interaction);
+      }
+      return;
+    }
+
     if (interaction.isButton()) {
       if (interaction.customId === BUTTON_ID.CALENDAR) {
         await handleCalendarButton(interaction);
