@@ -1,6 +1,6 @@
 # Discord Forum Reaction Tracker Bot
 
-When a new thread is created in the designated **forum channel**, the bot automatically posts a tracking message and records **who reacted with which emoji** to the thread's first (starter) message in real time.
+When a new thread is created in one of the **watched forum channels**, the bot automatically posts a tracking message and records **who reacted with which emoji** to the thread's first (starter) message in real time.
 
 ---
 
@@ -74,11 +74,13 @@ The command is only visible to members with the **Manage Server** permission by 
 **A freshly started bot watches nothing.** Run `/forum add` once to start tracking.
 The watch list is stored in `data/forums.json` and survives restarts.
 
+**Upgrading from an older install?** The `/forum` command needs the `applications.commands` OAuth2 scope, which older invite links didn't include. If `/forum` doesn't show up, re-invite the bot with both scopes checked (see **Bot Permissions** below). Re-inviting does not kick the bot from the server or lose any data — it just grants the extra scope.
+
 ---
 
 ## 🤖 Bot Permissions
 
-**OAuth2 Scopes**: `bot`
+**OAuth2 Scopes**: `bot`, `applications.commands`
 
 **Bot Permissions**:
 - `View Channels`
@@ -106,7 +108,14 @@ npm test
 On successful start, the console will print:
 ```
 Logged in as your-bot-name#1234
-[sweep] N scanned, M created, K resynced
+[commands] registered for guild <guild-id>
+[sweep] no forums registered. Use /forum add to register one.
+```
+
+Once one or more forums are registered, the sweep instead prints one line per forum plus a total:
+```
+[sweep] forum <forum-id>: N scanned, M created, K resynced
+[sweep] total: N scanned, M created, K resynced (0 forum(s) skipped)
 ```
 
 ---
@@ -116,6 +125,9 @@ Logged in as your-bot-name#1234
 ```
 src/
 ├── config/env.ts                 # Environment variable loader
+├── commands/
+│   ├── definitions.ts             # /forum slash command definition & guild registration
+│   └── forum.ts                   # /forum add|remove|list handlers
 ├── i18n/                          # Locale resources (ko/ja/en)
 ├── services/
 │   ├── threadTracker.ts          # Handles threadCreate
@@ -127,6 +139,7 @@ src/
 │       ├── eventInterval.ts      # Start/end time validation & UTC conversion (pure)
 │       └── handler.ts            # Calendar button/modal
 ├── store/
+│   ├── forumStore.ts             # Watched forum list persistence
 │   └── trackingStore.ts          # Mapping persistence
 ├── utils/
 │   ├── reactionCollector.ts      # Aggregates user IDs by emoji

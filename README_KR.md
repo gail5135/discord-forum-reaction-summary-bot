@@ -1,6 +1,6 @@
 # Discord Forum Reaction Tracker Bot
 
-지정한 **포럼 채널**에 새 스레드가 생기면 봇이 자동으로 추적 메시지를 만들고, 스레드 첫 메시지(스타터)에 달리는 **리액션을 이모지별로 누가 눌렀는지** 실시간으로 기록합니다.
+감시 중인 **포럼 채널**들 중 하나에 새 스레드가 생기면 봇이 자동으로 추적 메시지를 만들고, 스레드 첫 메시지(스타터)에 달리는 **리액션을 이모지별로 누가 눌렀는지** 실시간으로 기록합니다.
 
 ---
 
@@ -74,11 +74,13 @@ BOT_TIMEZONE=Asia/Tokyo
 **봇을 처음 켰을 때는 감시 중인 포럼이 없습니다.** `/forum add`를 한 번 실행해야 추적이 시작됩니다.
 감시 목록은 `data/forums.json`에 저장되어 재시작 후에도 유지됩니다.
 
+**기존에 설치되어 있던 봇을 업그레이드하는 경우**: `/forum` 명령어를 쓰려면 `applications.commands` OAuth2 스코프가 필요한데, 예전 초대 링크에는 이 스코프가 빠져 있었습니다. `/forum`이 보이지 않는다면 아래 **봇 권한** 항목을 참고해 두 스코프를 모두 체크한 상태로 봇을 다시 초대해주세요. 다시 초대해도 봇이 서버에서 나가거나 데이터가 사라지지 않으며, 스코프만 추가로 부여됩니다.
+
 ---
 
 ## 🤖 봇 권한
 
-**OAuth2 Scopes**: `bot`
+**OAuth2 Scopes**: `bot`, `applications.commands`
 
 **Bot Permissions**:
 - `View Channels`
@@ -106,7 +108,14 @@ npm test
 성공 시 콘솔에 다음과 같이 출력됩니다:
 ```
 Logged in as your-bot-name#1234
-[sweep] N scanned, M created, K resynced
+[commands] registered for guild <guild-id>
+[sweep] no forums registered. Use /forum add to register one.
+```
+
+포럼이 하나 이상 등록되어 있으면, 스윕 결과는 대신 포럼별 한 줄과 합계 한 줄로 출력됩니다:
+```
+[sweep] forum <forum-id>: N scanned, M created, K resynced
+[sweep] total: N scanned, M created, K resynced (0 forum(s) skipped)
 ```
 
 ---
@@ -116,6 +125,9 @@ Logged in as your-bot-name#1234
 ```
 src/
 ├── config/env.ts                 # 환경변수 로더
+├── commands/
+│   ├── definitions.ts             # /forum 슬래시 명령어 정의 및 길드 등록
+│   └── forum.ts                   # /forum add|remove|list 핸들러
 ├── i18n/                          # 다국어 리소스 (ko/ja/en)
 ├── services/
 │   ├── threadTracker.ts          # threadCreate 처리
@@ -127,6 +139,7 @@ src/
 │       ├── eventInterval.ts      # 시작/종료 시각 검증·UTC 변환 (순수 함수)
 │       └── handler.ts            # 캘린더 버튼/모달
 ├── store/
+│   ├── forumStore.ts             # 감시 포럼 목록 영속화
 │   └── trackingStore.ts          # 매핑 영속화
 ├── utils/
 │   ├── reactionCollector.ts      # 이모지별 유저 ID 집계
