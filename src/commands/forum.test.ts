@@ -13,7 +13,7 @@ delete process.env.BOT_LOCALE; // 로케일 인자가 실제로 쓰이는지 확
 // 실제 data/ 디렉터리를 건드리지 않도록 임시 디렉터리로 격리한다.
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "forum-cmd-"));
 
-const { formatForumList } = require("./forum") as typeof import("./forum");
+const { formatForumList, formatAddResult } = require("./forum") as typeof import("./forum");
 
 test("renders watched forums as channel mentions", () => {
   const output = formatForumList(["111", "222"], "en");
@@ -32,4 +32,70 @@ test("uses the requested locale", () => {
   const output = formatForumList(["111"], "ko");
   assert.match(output, /감시 중인 포럼/);
   assert.match(output, /<#111>/);
+});
+
+test("reports the sweep counts when threads were swept", () => {
+  const output = formatAddResult(
+    { scanned: 3, created: 2, resynced: 1 },
+    { count: 0, hasMore: false },
+    "en"
+  );
+  assert.match(output, /Now watching this forum/);
+  assert.match(output, /scanned: 3, created: 2, resynced: 1/);
+});
+
+test("explains the empty sweep instead of reporting three zeroes", () => {
+  const output = formatAddResult(
+    { scanned: 0, created: 0, resynced: 0 },
+    { count: 0, hasMore: false },
+    "en"
+  );
+  assert.match(output, /no active threads/i);
+  assert.doesNotMatch(output, /scanned: 0/);
+});
+
+test("names how many archived posts were left out of the backfill", () => {
+  const output = formatAddResult(
+    { scanned: 0, created: 0, resynced: 0 },
+    { count: 2, hasMore: false },
+    "en"
+  );
+  assert.match(output, /archived \(not backfilled\): 2/);
+});
+
+test("marks the archived count as a floor when more pages remain", () => {
+  const output = formatAddResult(
+    { scanned: 0, created: 0, resynced: 0 },
+    { count: 100, hasMore: true },
+    "en"
+  );
+  assert.match(output, /archived \(not backfilled\): 100\+/);
+});
+
+test("omits the archived line when there is nothing archived", () => {
+  const output = formatAddResult(
+    { scanned: 0, created: 0, resynced: 0 },
+    { count: 0, hasMore: false },
+    "en"
+  );
+  assert.doesNotMatch(output, /archived/i);
+});
+
+test("does not mention archived posts when the sweep found threads", () => {
+  const output = formatAddResult(
+    { scanned: 3, created: 3, resynced: 0 },
+    { count: 5, hasMore: false },
+    "en"
+  );
+  assert.doesNotMatch(output, /archived/i);
+});
+
+test("formats the empty-sweep message in the requested locale", () => {
+  const output = formatAddResult(
+    { scanned: 0, created: 0, resynced: 0 },
+    { count: 2, hasMore: false },
+    "ko"
+  );
+  assert.match(output, /활성 스레드가 없어/);
+  assert.match(output, /archived \(not backfilled\): 2/);
 });

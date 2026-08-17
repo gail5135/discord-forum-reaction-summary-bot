@@ -26,6 +26,8 @@ export const en = {
   command: {
     forum: {
       added: "Now watching this forum. Swept the existing active threads.",
+      addedEmpty:
+        "Now watching this forum. There were no active threads, so nothing existing was processed. New posts from now on are tracked automatically.",
       addedNoAccess:
         "Added to the watch list, but the channel could not be read, so existing threads were not processed. Please check the bot's permissions.",
       alreadyAdded: "This forum is already being watched.",

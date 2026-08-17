@@ -61,6 +61,38 @@ export async function sweepForum(
   return result;
 }
 
+export type ArchivedCount = {
+  count: number;
+  /** 한 페이지를 넘겨 더 남아 있으면 true — count는 하한값이 된다. */
+  hasMore: boolean;
+};
+
+/**
+ * 백필 대상이 아닌 보관된 공개 스레드 수를 센다.
+ * 포럼 게시글은 시간이 지나면 자동 보관되고 fetchActive()에 잡히지 않으므로,
+ * 스윕 결과가 0일 때 "왜 0인지"를 사용자에게 설명하는 용도로만 쓴다.
+ * 한 페이지(최대 100개)만 조회한다.
+ */
+export async function countArchivedThreads(
+  client: Client,
+  forumId: string
+): Promise<ArchivedCount> {
+  const empty: ArchivedCount = { count: 0, hasMore: false };
+
+  const forum = await client.channels.fetch(forumId).catch(() => null);
+  if (!forum || forum.type !== ChannelType.GuildForum) return empty;
+
+  const archived = await (forum as ForumChannel).threads
+    .fetchArchived({ type: "public", limit: 100 })
+    .catch((err) => {
+      console.error(`[sweep] fetchArchived failed for ${forumId}:`, err);
+      return null;
+    });
+  if (!archived) return empty;
+
+  return { count: archived.threads.size, hasMore: archived.hasMore === true };
+}
+
 /** 등록된 모든 포럼을 스윕한다. 실패한 포럼은 건너뛰고 나머지를 계속 처리한다. */
 export async function run(client: Client): Promise<void> {
   const forums = forumStore.all();
