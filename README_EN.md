@@ -74,6 +74,8 @@ The command is only visible to members with the **Manage Server** permission by 
 **A freshly started bot watches nothing.** Run `/forum add` once to start tracking.
 The watch list is stored in `data/forums.json` and survives restarts.
 
+**The backfill covers active threads only.** Forum posts are archived automatically after a period of inactivity, and archived posts do not get tracking messages. So adding an older forum can report `scanned: 0` — that is not a malfunction, it means there were no active threads to sweep, and the reply tells you how many archived posts were left out. New posts from then on are tracked normally.
+
 **Upgrading from an older install?** The `/forum` command needs the `applications.commands` OAuth2 scope, which older invite links didn't include. If `/forum` doesn't show up, re-invite the bot with both scopes checked (see **Bot Permissions** below). Re-inviting does not kick the bot from the server or lose any data — it just grants the extra scope.
 
 ---

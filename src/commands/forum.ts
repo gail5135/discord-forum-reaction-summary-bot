@@ -2,7 +2,12 @@ import { ChatInputCommandInteraction } from "discord.js";
 
 import { BOT_LOCALE } from "../config/env";
 import { t } from "../i18n";
-import { sweepForum } from "../services/startupSweeper";
+import {
+  ArchivedCount,
+  SweepResult,
+  countArchivedThreads,
+  sweepForum,
+} from "../services/startupSweeper";
 import * as forumStore from "../store/forumStore";
 import { CHANNEL_OPTION, SUBCOMMAND } from "./definitions";
 
@@ -15,6 +20,27 @@ export function formatForumList(forumIds: string[], locale: string): string {
   if (forumIds.length === 0) return t("command.forum.listEmpty", locale);
   const lines = forumIds.map((id) => `- <#${id}>`).join("\n");
   return `${t("command.forum.listHeader", locale)}\n${lines}`;
+}
+
+/**
+ * /forum add 의 성공 응답을 만든다.
+ * 훑을 활성 스레드가 하나도 없으면 0을 세 번 나열하는 대신 왜 0인지 설명한다
+ * (포럼 게시글은 자동 보관되면 백필 대상에서 빠진다).
+ */
+export function formatAddResult(
+  result: SweepResult,
+  archived: ArchivedCount,
+  locale: string
+): string {
+  if (result.scanned > 0) {
+    return `${t("command.forum.added", locale)}\n\`scanned: ${result.scanned}, created: ${result.created}, resynced: ${result.resynced}\``;
+  }
+
+  const message = t("command.forum.addedEmpty", locale);
+  if (archived.count === 0) return message;
+
+  const count = archived.hasMore ? `${archived.count}+` : `${archived.count}`;
+  return `${message}\n\`archived (not backfilled): ${count}\``;
 }
 
 async function handleAdd(
@@ -58,8 +84,14 @@ async function handleAdd(
     return;
   }
 
+  // 훑을 게 없었다면 보관된 글 수를 세어, 0이 나온 이유를 응답에 담는다.
+  const archived =
+    result.scanned === 0
+      ? await countArchivedThreads(interaction.client, channel.id)
+      : { count: 0, hasMore: false };
+
   await interaction.editReply({
-    content: `${t("command.forum.added", locale)}\n\`scanned: ${result.scanned}, created: ${result.created}, resynced: ${result.resynced}\``,
+    content: formatAddResult(result, archived, locale),
   });
 }
 
