@@ -17,6 +17,5 @@ const resolveTimeZone = (): string => {
 };
 
 export const DISCORD_TOKEN = requireEnv("DISCORD_TOKEN");
-export const TARGET_FORUM_ID = requireEnv("TARGET_FORUM_ID");
 export const BOT_LOCALE = process.env.BOT_LOCALE;
 export const BOT_TIMEZONE = resolveTimeZone();
