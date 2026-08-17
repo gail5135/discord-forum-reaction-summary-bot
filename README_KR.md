@@ -47,7 +47,6 @@
 `.env`:
 ```env
 DISCORD_TOKEN=YOUR_BOT_TOKEN
-TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=ko
 BOT_TIMEZONE=Asia/Tokyo
 ```
@@ -55,9 +54,25 @@ BOT_TIMEZONE=Asia/Tokyo
 | 변수 | 설명 | 필수 |
 |---|---|---|
 | `DISCORD_TOKEN` | Discord Bot 토큰 | ✅ |
-| `TARGET_FORUM_ID` | 감시할 포럼 채널 ID | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en` (미설정 시 길드 기본 → `en`) | ❌ |
 | `BOT_TIMEZONE` | 캘린더 일정 입력 시각을 해석할 IANA 타임존 (예: `Asia/Tokyo`). 미설정이거나 유효하지 않은 IANA 타임존이면 기동에 실패 | ✅ |
+
+---
+
+## 감시할 포럼 채널 설정
+
+감시 대상 포럼은 디스코드 안에서 슬래시 명령어로 관리합니다. 재시작은 필요 없습니다.
+
+| 명령 | 설명 |
+| --- | --- |
+| `/forum add channel:<포럼>` | 해당 포럼 감시 시작. 등록 직후 기존 활성 스레드에도 추적 메시지를 답니다. |
+| `/forum remove channel:<포럼>` | 감시 중단. 새 스레드만 추적하지 않으며, 이미 달린 추적 메시지는 남아서 계속 갱신됩니다. |
+| `/forum list` | 현재 감시 중인 포럼 목록 |
+
+명령어는 기본적으로 **서버 관리** 권한을 가진 사람에게만 보입니다. 서버 설정 > 연동에서 다른 역할에 열어줄 수 있습니다.
+
+**봇을 처음 켰을 때는 감시 중인 포럼이 없습니다.** `/forum add`를 한 번 실행해야 추적이 시작됩니다.
+감시 목록은 `data/forums.json`에 저장되어 재시작 후에도 유지됩니다.
 
 ---
 
