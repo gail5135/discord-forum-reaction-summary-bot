@@ -14,9 +14,13 @@ const byForumId = new Map<string, ForumRecord>();
 
 function load(): void {
   if (!fs.existsSync(FILE_PATH)) return;
-  const raw = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8")) as ForumRecord[];
-  for (const record of raw) {
-    byForumId.set(record.forumId, record);
+  try {
+    const raw = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8")) as ForumRecord[];
+    for (const record of raw) {
+      byForumId.set(record.forumId, record);
+    }
+  } catch (error) {
+    console.error(`[forumStore] failed to load ${FILE_PATH}, starting empty:`, error);
   }
 }
 

@@ -74,3 +74,12 @@ test("starts empty when no file exists yet", () => {
   assert.deepEqual(store.all(), []);
   assert.equal(store.has("forum-1"), false);
 });
+
+test("starts empty instead of throwing when forums.json is corrupt", () => {
+  const dir = tmpDir();
+  fs.writeFileSync(path.join(dir, "forums.json"), "{ this is not valid json");
+
+  const store = freshStore(dir);
+  assert.deepEqual(store.all(), []);
+  assert.equal(store.has("forum-1"), false);
+});

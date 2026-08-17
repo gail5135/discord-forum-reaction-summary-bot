@@ -34,11 +34,18 @@ async function handleAdd(
   // 백필 스윕이 3초를 넘길 수 있으므로 먼저 defer 한다.
   await interaction.deferReply({ ephemeral: true });
 
-  forumStore.add({
+  // defer 사이에 동일 채널에 대한 /forum add가 다시 들어올 수 있으므로,
+  // add()의 반환값으로 실제로 새로 추가됐는지 다시 확인한다(TOCTOU 방지).
+  const added = forumStore.add({
     forumId: channel.id,
     guildId: interaction.guildId ?? "",
     addedAt: new Date().toISOString(),
   });
+
+  if (!added) {
+    await interaction.editReply({ content: t("command.forum.alreadyAdded", locale) });
+    return;
+  }
 
   // 등록 직후 기존 활성 스레드를 훑는다. 이게 없으면 새 스레드가 생기기 전까지
   // 아무 일도 일어나지 않아 사용자가 동작을 확인할 수 없다.
@@ -104,6 +111,12 @@ export async function handleForumCommand(
         await handleList(interaction, locale);
         return;
       default:
+        // 등록된 정의에 없는 서브커맨드는 Discord가 걸러내므로 실질적으로 도달하지
+        // 않지만, 혹시라도 도달하면 상호작용을 무응답으로 남기지 않는다.
+        await interaction.reply({
+          content: t("command.forum.failed", locale),
+          ephemeral: true,
+        });
         return;
     }
   } catch (error) {

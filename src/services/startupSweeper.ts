@@ -20,10 +20,12 @@ export async function sweepForum(
   forumId: string
 ): Promise<SweepResult | null> {
   const forum = await client.channels.fetch(forumId).catch(() => null);
-  if (!forum || forum.type !== ChannelType.GuildForum) {
-    console.error(
-      `[sweep] ${forumId} is not accessible or not a forum channel, skipping`
-    );
+  if (!forum) {
+    console.error(`[sweep] ${forumId} not found or not accessible, skipping`);
+    return null;
+  }
+  if (forum.type !== ChannelType.GuildForum) {
+    console.error(`[sweep] ${forumId} is not a forum channel, skipping`);
     return null;
   }
 
@@ -82,6 +84,6 @@ export async function run(client: Client): Promise<void> {
   }
 
   console.log(
-    `[sweep] total: ${total.scanned} scanned, ${total.created} created, ${total.resynced} resynced (${skipped} skipped)`
+    `[sweep] total: ${total.scanned} scanned, ${total.created} created, ${total.resynced} resynced (${skipped} forum(s) skipped)`
   );
 }
