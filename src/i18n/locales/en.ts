@@ -23,6 +23,20 @@ export const en = {
     calendarOpenModal: "Enter Event Details",
     calendarCancel: "Cancel",
   },
+  command: {
+    forum: {
+      added: "Now watching this forum. Swept the existing active threads.",
+      addedNoAccess:
+        "Added to the watch list, but the channel could not be read, so existing threads were not processed. Please check the bot's permissions.",
+      alreadyAdded: "This forum is already being watched.",
+      removed:
+        "Stopped watching this forum. New threads will no longer be tracked, but existing tracking messages are kept and will still be updated.",
+      notRegistered: "This forum is not being watched.",
+      listHeader: "Watched forums:",
+      listEmpty: "No forums are being watched. Use `/forum add` to add one.",
+      failed: "Failed to run the command.",
+    },
+  },
   summary: {
     empty: "_No reactions yet._",
   },

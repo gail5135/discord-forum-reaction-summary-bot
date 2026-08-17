@@ -1,6 +1,6 @@
 # Discord Forum Reaction Tracker Bot
 
-When a new thread is created in the designated **forum channel**, the bot automatically posts a tracking message and records **who reacted with which emoji** to the thread's first (starter) message in real time.
+When a new thread is created in one of the **watched forum channels**, the bot automatically posts a tracking message and records **who reacted with which emoji** to the thread's first (starter) message in real time.
 
 ---
 
@@ -47,7 +47,6 @@ When a new thread is created in the designated **forum channel**, the bot automa
 `.env`:
 ```env
 DISCORD_TOKEN=YOUR_BOT_TOKEN
-TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=en
 BOT_TIMEZONE=Asia/Tokyo
 ```
@@ -55,15 +54,33 @@ BOT_TIMEZONE=Asia/Tokyo
 | Variable | Description | Required |
 |---|---|---|
 | `DISCORD_TOKEN` | Discord bot token | ✅ |
-| `TARGET_FORUM_ID` | ID of the forum channel to watch | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en` (falls back to guild preferred locale → `en` when unset) | ❌ |
 | `BOT_TIMEZONE` | IANA timezone used to interpret calendar event input times (e.g. `Asia/Tokyo`). Startup fails if it is missing or not a valid IANA timezone | ✅ |
 
 ---
 
+## Choosing which forums to watch
+
+Watched forums are managed with slash commands inside Discord. No restart needed.
+
+| Command | Description |
+| --- | --- |
+| `/forum add channel:<forum>` | Start watching that forum. Existing active threads get tracking messages right away. |
+| `/forum remove channel:<forum>` | Stop watching. Only new threads are skipped — existing tracking messages stay and keep updating. |
+| `/forum list` | Show the forums currently being watched |
+
+The command is only visible to members with the **Manage Server** permission by default. You can open it up to other roles in Server Settings > Integrations.
+
+**A freshly started bot watches nothing.** Run `/forum add` once to start tracking.
+The watch list is stored in `data/forums.json` and survives restarts.
+
+**Upgrading from an older install?** The `/forum` command needs the `applications.commands` OAuth2 scope, which older invite links didn't include. If `/forum` doesn't show up, re-invite the bot with both scopes checked (see **Bot Permissions** below). Re-inviting does not kick the bot from the server or lose any data — it just grants the extra scope.
+
+---
+
 ## 🤖 Bot Permissions
 
-**OAuth2 Scopes**: `bot`
+**OAuth2 Scopes**: `bot`, `applications.commands`
 
 **Bot Permissions**:
 - `View Channels`
@@ -91,7 +108,14 @@ npm test
 On successful start, the console will print:
 ```
 Logged in as your-bot-name#1234
-[sweep] N scanned, M created, K resynced
+[commands] registered for guild <guild-id>
+[sweep] no forums registered. Use /forum add to register one.
+```
+
+Once one or more forums are registered, the sweep instead prints one line per forum plus a total:
+```
+[sweep] forum <forum-id>: N scanned, M created, K resynced
+[sweep] total: N scanned, M created, K resynced (0 forum(s) skipped)
 ```
 
 ---
@@ -101,6 +125,9 @@ Logged in as your-bot-name#1234
 ```
 src/
 ├── config/env.ts                 # Environment variable loader
+├── commands/
+│   ├── definitions.ts             # /forum slash command definition & guild registration
+│   └── forum.ts                   # /forum add|remove|list handlers
 ├── i18n/                          # Locale resources (ko/ja/en)
 ├── services/
 │   ├── threadTracker.ts          # Handles threadCreate
@@ -112,6 +139,7 @@ src/
 │       ├── eventInterval.ts      # Start/end time validation & UTC conversion (pure)
 │       └── handler.ts            # Calendar button/modal
 ├── store/
+│   ├── forumStore.ts             # Watched forum list persistence
 │   └── trackingStore.ts          # Mapping persistence
 ├── utils/
 │   ├── reactionCollector.ts      # Aggregates user IDs by emoji

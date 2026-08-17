@@ -1,6 +1,6 @@
 # Discord Forum Reaction Tracker Bot
 
-지정한 **포럼 채널**에 새 스레드가 생기면 봇이 자동으로 추적 메시지를 만들고, 스레드 첫 메시지(스타터)에 달리는 **리액션을 이모지별로 누가 눌렀는지** 실시간으로 기록합니다.
+감시 중인 **포럼 채널**들 중 하나에 새 스레드가 생기면 봇이 자동으로 추적 메시지를 만들고, 스레드 첫 메시지(스타터)에 달리는 **리액션을 이모지별로 누가 눌렀는지** 실시간으로 기록합니다.
 
 ---
 
@@ -47,7 +47,6 @@
 `.env`:
 ```env
 DISCORD_TOKEN=YOUR_BOT_TOKEN
-TARGET_FORUM_ID=123456789012345678
 BOT_LOCALE=ko
 BOT_TIMEZONE=Asia/Tokyo
 ```
@@ -55,15 +54,33 @@ BOT_TIMEZONE=Asia/Tokyo
 | 변수 | 설명 | 필수 |
 |---|---|---|
 | `DISCORD_TOKEN` | Discord Bot 토큰 | ✅ |
-| `TARGET_FORUM_ID` | 감시할 포럼 채널 ID | ✅ |
 | `BOT_LOCALE` | `ko` / `ja` / `en` (미설정 시 길드 기본 → `en`) | ❌ |
 | `BOT_TIMEZONE` | 캘린더 일정 입력 시각을 해석할 IANA 타임존 (예: `Asia/Tokyo`). 미설정이거나 유효하지 않은 IANA 타임존이면 기동에 실패 | ✅ |
 
 ---
 
+## 감시할 포럼 채널 설정
+
+감시 대상 포럼은 디스코드 안에서 슬래시 명령어로 관리합니다. 재시작은 필요 없습니다.
+
+| 명령 | 설명 |
+| --- | --- |
+| `/forum add channel:<포럼>` | 해당 포럼 감시 시작. 등록 직후 기존 활성 스레드에도 추적 메시지를 답니다. |
+| `/forum remove channel:<포럼>` | 감시 중단. 새 스레드만 추적하지 않으며, 이미 달린 추적 메시지는 남아서 계속 갱신됩니다. |
+| `/forum list` | 현재 감시 중인 포럼 목록 |
+
+명령어는 기본적으로 **서버 관리** 권한을 가진 사람에게만 보입니다. 서버 설정 > 연동에서 다른 역할에 열어줄 수 있습니다.
+
+**봇을 처음 켰을 때는 감시 중인 포럼이 없습니다.** `/forum add`를 한 번 실행해야 추적이 시작됩니다.
+감시 목록은 `data/forums.json`에 저장되어 재시작 후에도 유지됩니다.
+
+**기존에 설치되어 있던 봇을 업그레이드하는 경우**: `/forum` 명령어를 쓰려면 `applications.commands` OAuth2 스코프가 필요한데, 예전 초대 링크에는 이 스코프가 빠져 있었습니다. `/forum`이 보이지 않는다면 아래 **봇 권한** 항목을 참고해 두 스코프를 모두 체크한 상태로 봇을 다시 초대해주세요. 다시 초대해도 봇이 서버에서 나가거나 데이터가 사라지지 않으며, 스코프만 추가로 부여됩니다.
+
+---
+
 ## 🤖 봇 권한
 
-**OAuth2 Scopes**: `bot`
+**OAuth2 Scopes**: `bot`, `applications.commands`
 
 **Bot Permissions**:
 - `View Channels`
@@ -91,7 +108,14 @@ npm test
 성공 시 콘솔에 다음과 같이 출력됩니다:
 ```
 Logged in as your-bot-name#1234
-[sweep] N scanned, M created, K resynced
+[commands] registered for guild <guild-id>
+[sweep] no forums registered. Use /forum add to register one.
+```
+
+포럼이 하나 이상 등록되어 있으면, 스윕 결과는 대신 포럼별 한 줄과 합계 한 줄로 출력됩니다:
+```
+[sweep] forum <forum-id>: N scanned, M created, K resynced
+[sweep] total: N scanned, M created, K resynced (0 forum(s) skipped)
 ```
 
 ---
@@ -101,6 +125,9 @@ Logged in as your-bot-name#1234
 ```
 src/
 ├── config/env.ts                 # 환경변수 로더
+├── commands/
+│   ├── definitions.ts             # /forum 슬래시 명령어 정의 및 길드 등록
+│   └── forum.ts                   # /forum add|remove|list 핸들러
 ├── i18n/                          # 다국어 리소스 (ko/ja/en)
 ├── services/
 │   ├── threadTracker.ts          # threadCreate 처리
@@ -112,6 +139,7 @@ src/
 │       ├── eventInterval.ts      # 시작/종료 시각 검증·UTC 변환 (순수 함수)
 │       └── handler.ts            # 캘린더 버튼/모달
 ├── store/
+│   ├── forumStore.ts             # 감시 포럼 목록 영속화
 │   └── trackingStore.ts          # 매핑 영속화
 ├── utils/
 │   ├── reactionCollector.ts      # 이모지별 유저 ID 집계

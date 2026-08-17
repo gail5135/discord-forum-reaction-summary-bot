@@ -1,6 +1,7 @@
 import { ThreadChannel } from "discord.js";
 
-import { TARGET_FORUM_ID, BOT_LOCALE } from "../config/env";
+import { BOT_LOCALE } from "../config/env";
+import * as forumStore from "../store/forumStore";
 import * as trackingStore from "../store/trackingStore";
 import { formatEmpty } from "../utils/format";
 import { calendarButtonRow } from "./calendar/button";
@@ -16,7 +17,7 @@ function resolveLocale(thread: ThreadChannel): string {
 export async function ensureTrackingMessage(
   thread: ThreadChannel
 ): Promise<void> {
-  if (thread.parentId !== TARGET_FORUM_ID) return;
+  if (!thread.parentId || !forumStore.has(thread.parentId)) return;
   if (trackingStore.getByThreadId(thread.id)) return;
 
   let starter = await thread.fetchStarterMessage().catch(() => null);
