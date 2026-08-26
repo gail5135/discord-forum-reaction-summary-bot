@@ -122,6 +122,44 @@ Once one or more forums are registered, the sweep instead prints one line per fo
 
 ---
 
+## 🛰️ Deployment (pm2)
+
+To keep the bot running on a server, run the build output rather than `npm start` (which uses ts-node).
+
+```bash
+npm install
+npm run build
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+Run `pm2 startup` once and the state saved by `pm2 save` is restored automatically after a server reboot.
+
+To deploy an update:
+```bash
+git pull
+npm install
+npm run build
+pm2 restart forum-bot
+```
+
+`dist/` is in `.gitignore`, so `git pull` alone does not refresh it. You must run `npm run build` on the server every time, and since the build needs `typescript`, do not install with `npm install --omit=dev`.
+
+**Mind the working directory.** `.env` and `data/` are resolved from the current working directory at startup. `ecosystem.config.js` pins `cwd` to the repo, so the commands above are safe — but if you start the process by hand, always pass `--cwd`:
+```bash
+pm2 start dist/index.js --name forum-bot --cwd /path/to/repo
+```
+With the wrong cwd the bot cannot find `.env` and dies with `DISCORD_TOKEN is required`. If the token happens to be set as a system environment variable, the bot starts but creates an empty `data/` in the wrong place, which **looks exactly like the watch list was wiped.**
+
+**Exactly one instance.** The bot must hold a single gateway connection. Running it under pm2 cluster mode processes every reaction event twice and lets two processes overwrite `data/*.json` at the same time.
+
+Viewing logs:
+```bash
+pm2 logs forum-bot
+```
+
+---
+
 ## 📁 Project Structure
 
 ```

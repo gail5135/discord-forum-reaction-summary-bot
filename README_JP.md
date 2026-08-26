@@ -122,6 +122,44 @@ Logged in as your-bot-name#1234
 
 ---
 
+## 🛰️ デプロイ (pm2)
+
+サーバーで常駐させる場合は `npm start`（ts-node）ではなく、ビルド成果物を実行します。
+
+```bash
+npm install
+npm run build
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+`pm2 startup` を一度実行しておけば、`pm2 save` で保存した状態がサーバー再起動後も自動的に復元されます。
+
+コードを更新したとき:
+```bash
+git pull
+npm install
+npm run build
+pm2 restart forum-bot
+```
+
+`dist/` は `.gitignore` の対象なので `git pull` だけでは更新されません。サーバー側で毎回 `npm run build` を実行する必要があり、ビルドに `typescript` が必要なため `npm install --omit=dev` でインストールしてはいけません。
+
+**作業ディレクトリ（cwd）に注意。** `.env` と `data/` は起動時の作業ディレクトリを基準に解決されます。`ecosystem.config.js` が `cwd` をリポジトリのパスに固定するため上記の手順なら問題ありませんが、コマンドラインから直接起動する場合は必ず `--cwd` を指定してください:
+```bash
+pm2 start dist/index.js --name forum-bot --cwd /path/to/repo
+```
+cwd がずれると `.env` が見つからず `DISCORD_TOKEN is required` で落ちます。トークンがシステム環境変数に設定されている場合はボットは起動しますが、別の場所に空の `data/` を作ってしまうため、**監視リストが消えたように見えます。**
+
+**インスタンスは必ず 1 つ。** ボットはゲートウェイ接続を 1 本だけ維持する必要があります。pm2 の cluster モードで複数起動すると、リアクションイベントが二重に処理され、2 つのプロセスが同時に `data/*.json` を上書きします。
+
+ログの確認:
+```bash
+pm2 logs forum-bot
+```
+
+---
+
 ## 📁 プロジェクト構造
 
 ```

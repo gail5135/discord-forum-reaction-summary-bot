@@ -122,6 +122,44 @@ Logged in as your-bot-name#1234
 
 ---
 
+## 🛰️ 배포 (pm2)
+
+서버에 상주시킬 때는 `npm start`(ts-node)가 아니라 빌드 결과물을 실행합니다.
+
+```bash
+npm install
+npm run build
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+`pm2 startup`을 한 번 실행해두면 서버 재부팅 후에도 `pm2 save`로 저장된 상태가 자동 복구됩니다.
+
+코드를 업데이트했을 때:
+```bash
+git pull
+npm install
+npm run build
+pm2 restart forum-bot
+```
+
+`dist/`는 `.gitignore` 대상이라 `git pull`만으로는 갱신되지 않습니다. 서버에서 매번 `npm run build`를 실행해야 하고, 빌드에 `typescript`가 필요하므로 `npm install --omit=dev`로 설치하면 안 됩니다.
+
+**작업 디렉터리(cwd) 주의.** `.env`와 `data/`는 실행 시점의 작업 디렉터리 기준으로 찾습니다. `ecosystem.config.js`가 `cwd`를 레포 경로로 고정하므로 위 방법대로 띄우면 문제없지만, 명령줄로 직접 띄운다면 `--cwd`를 반드시 지정하세요:
+```bash
+pm2 start dist/index.js --name forum-bot --cwd /path/to/repo
+```
+cwd가 어긋나면 `.env`를 못 찾아 `DISCORD_TOKEN is required`로 죽습니다. 토큰이 시스템 환경변수에 들어 있는 경우엔 봇이 뜨긴 하지만 빈 `data/`를 엉뚱한 위치에 새로 만들기 때문에 **감시 목록이 초기화된 것처럼 보입니다.**
+
+**인스턴스는 반드시 1개.** 봇은 게이트웨이 연결을 하나만 유지해야 합니다. pm2 cluster 모드로 여러 개 띄우면 리액션 이벤트가 중복 처리되고 두 프로세스가 `data/*.json`을 동시에 덮어씁니다.
+
+로그 확인:
+```bash
+pm2 logs forum-bot
+```
+
+---
+
 ## 📁 프로젝트 구조
 
 ```

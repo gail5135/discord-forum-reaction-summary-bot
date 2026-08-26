@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc",
+    "start:prod": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.typecheck.json",
     "test": "node --require ts-node/register --test \"src/**/*.test.ts\""
   },
